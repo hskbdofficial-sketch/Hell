@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "307585490129",
+    "project_id": "thrift-hive-f0997",
+    "storage_bucket": "thrift-hive-f0997.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:307585490129:android:b1d63d566f24310d30b9f0",
+        "android_client_info": {
+          "package_name": "Com.hsk.hellstore"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "307585490129-i5ffae5lksmkd00htvbd72iurgcpm5le.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0NGR5r8PYV0ckaieSC4OOmaouoQMcVlQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "307585490129-i5ffae5lksmkd00htvbd72iurgcpm5le.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

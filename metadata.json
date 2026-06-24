@@ -1,0 +1,6 @@
+{
+  "name": "HELLSEC STORE",
+  "description": "HELLSEC STORE is a secure cyber security marketplace platform featuring digital products, freelancer escrow jobs, KYC, and integrated SKULL wallet system.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

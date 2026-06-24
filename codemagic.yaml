@@ -1,0 +1,86 @@
+# Codemagic configuration file for HELLSEC STORE / Android Build
+# For more information, see: https://docs.codemagic.io/yaml/building/
+
+workflows:
+  android-build:
+    name: Android Build Workflow
+    max_build_duration: 60
+    instance_type: mac_mini_m1 # Standard Mac Mini M1 instance or standard Linux build machine
+    environment:
+      groups:
+        # Group of variables configured in Codemagic Application Settings UI:
+        # - GEMINI_API_KEY
+        # - FIREBASE_API_KEY
+        # - SUPABASE_URL
+        # - SUPABASE_ANON_KEY
+        # - STORE_PASSWORD (For release signing)
+        # - KEY_PASSWORD (For release signing)
+        # - KEYSTORE_BASE64 (Base64-encoded release .jks or .keystore file)
+        - hellsec_store_credentials
+      vars:
+        JAVA_VERSION: "17"
+    triggering:
+      events:
+        - push
+        - pull_request
+      branch_patterns:
+        - pattern: '*'
+          include: true
+          source: true
+    scripts:
+      - name: Set up JDK
+        script: |
+          echo "Setting up JDK 17..."
+          if [ -d "/Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home" ]; then
+            export JAVA_HOME="/Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home"
+          elif [ -f "/usr/libexec/java_home" ]; then
+            export JAVA_HOME=$(/usr/libexec/java_home -v 17)
+          fi
+          echo "export JAVA_HOME=$JAVA_HOME" >> $CM_ENV
+          echo "Using JDK path: $JAVA_HOME"
+          java -version
+      - name: Generate .env Configuration
+        script: |
+          echo "Generating .env file using environment variables..."
+          # Write environment variables to .env for the secrets-gradle-plugin
+          echo "GEMINI_API_KEY=${GEMINI_API_KEY:-MY_GEMINI_API_KEY}" > .env
+          echo "FIREBASE_API_KEY=${FIREBASE_API_KEY:-FIREBASE_API_KEY_PLACEHOLDER}" >> .env
+          echo "SUPABASE_URL=${SUPABASE_URL:-SUPABASE_URL_PLACEHOLDER}" >> .env
+          echo "SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY:-SUPABASE_ANON_KEY_PLACEHOLDER}" >> .env
+          echo "Successfully configured .env file."
+      - name: Configure Keystore for Release Signing (Optional)
+        script: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "Decoding release keystore..."
+            echo "$KEYSTORE_BASE64" | base64 --decode > my-upload-key.jks
+            export KEYSTORE_PATH="$(pwd)/my-upload-key.jks"
+            echo "export KEYSTORE_PATH=$KEYSTORE_PATH" >> $CM_ENV
+            echo "Keystore path exported to: $KEYSTORE_PATH"
+          else
+            echo "No custom release keystore base64 provided. Standard debug keys or default configs will be used."
+          fi
+      - name: Run Unit Tests
+        script: |
+          chmod +x gradlew
+          ./gradlew testDebugUnitTest
+      - name: Build Debug APK
+        script: |
+          ./gradlew assembleDebug
+      - name: Build Release APK / App Bundle
+        script: |
+          if [ -n "$STORE_PASSWORD" ] && [ -n "$KEY_PASSWORD" ]; then
+            echo "Building Release APK & Bundle..."
+            ./gradlew assembleRelease bundleRelease
+          else
+            echo "Keystore passwords not defined in Codemagic environment variables. Skipping release builds."
+          fi
+    artifacts:
+      - app/build/outputs/apk/**/*.apk
+      - app/build/outputs/bundle/**/*.aab
+    publishing:
+      email:
+        recipients:
+          - ahad50502p@gmail.com
+        notify:
+          success: true
+          failure: true
