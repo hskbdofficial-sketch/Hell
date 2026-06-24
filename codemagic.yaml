@@ -59,9 +59,21 @@ workflows:
           else
             echo "No custom release keystore base64 provided. Standard debug keys or default configs will be used."
           fi
+      - name: Repair and Regenerate Gradle Wrapper
+        script: |
+          echo "Repairing and regenerating Gradle Wrapper..."
+          if command -v gradle >/dev/null 2>&1; then
+            echo "Using pre-installed gradle to regenerate wrapper..."
+            gradle wrapper --gradle-version 9.3.1
+          else
+            echo "gradle command not found. Downloading pristine gradle-wrapper.jar via curl..."
+            mkdir -p gradle/wrapper
+            curl -fLo gradle/wrapper/gradle-wrapper.jar https://raw.githubusercontent.com/gradle/gradle/v9.3.1/gradle/wrapper/gradle-wrapper.jar || \
+            curl -fLo gradle/wrapper/gradle-wrapper.jar https://raw.githubusercontent.com/gradle/gradle/master/gradle/wrapper/gradle-wrapper.jar
+          fi
+          chmod +x gradlew
       - name: Run Unit Tests
         script: |
-          chmod +x gradlew
           ./gradlew testDebugUnitTest
       - name: Build Debug APK
         script: |
