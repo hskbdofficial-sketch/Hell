@@ -62,6 +62,8 @@ workflows:
       - name: Repair and Regenerate Gradle Wrapper
         script: |
           echo "Repairing and regenerating Gradle Wrapper..."
+          # Force remove any corrupted checked-in jar file
+          rm -f gradle/wrapper/gradle-wrapper.jar
           if command -v gradle >/dev/null 2>&1; then
             echo "Using pre-installed gradle to regenerate wrapper..."
             gradle wrapper --gradle-version 9.3.1
